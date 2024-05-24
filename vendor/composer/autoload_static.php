@@ -4,86 +4,20 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit609dc610458658c2f20916884625ebc6
+class ComposerStaticInitde022a098465cf7393de9e401c612d4f
 {
-    public static $files = array (
-        '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
-    );
-
-    public static $prefixLengthsPsr4 = array (
-        'S' => 
-        array (
-            'Symfony\\Polyfill\\Php80\\' => 23,
-            'Slim\\Tests\\' => 11,
-            'Slim\\Psr7\\' => 10,
-            'Slim\\' => 5,
-        ),
-        'P' => 
-        array (
-            'Psr\\Http\\Server\\' => 16,
-            'Psr\\Http\\Message\\' => 17,
-            'Psr\\Container\\' => 14,
-            'PHPMailer\\PHPMailer\\' => 20,
-        ),
-        'F' => 
-        array (
-            'Fig\\Http\\Message\\' => 17,
-            'FastRoute\\' => 10,
-        ),
-    );
-
-    public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Php80\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
-        ),
-        'Slim\\Tests\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/slim/slim/tests',
-        ),
-        'Slim\\Psr7\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/slim/psr7/src',
-        ),
-        'Slim\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/slim/slim/Slim',
-        ),
-        'Psr\\Http\\Server\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-server-handler/src',
-            1 => __DIR__ . '/..' . '/psr/http-server-middleware/src',
-        ),
-        'Psr\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
-        ),
-        'Psr\\Container\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/container/src',
-        ),
-        'PHPMailer\\PHPMailer\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
-        ),
-        'Fig\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/fig/http-message-util/src',
-        ),
-        'FastRoute\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/nikic/fast-route/src',
-        ),
-    );
-
     public static $fallbackDirsPsr4 = array (
-        0 => __DIR__ . '/..' . '/Ronald27Dev/php-classes/src',
+        0 => __DIR__ . '/..' . '/hcodebr/php-classes/src',
     );
 
     public static $prefixesPsr0 = array (
+        'S' => 
+        array (
+            'Slim' => 
+            array (
+                0 => __DIR__ . '/..' . '/slim/slim',
+            ),
+        ),
         'R' => 
         array (
             'Rain' => 
@@ -94,22 +28,23 @@ class ComposerStaticInit609dc610458658c2f20916884625ebc6
     );
 
     public static $classMap = array (
-        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
-        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
-        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+        'EasyPeasyICS' => __DIR__ . '/..' . '/phpmailer/phpmailer/extras/EasyPeasyICS.php',
+        'PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmailer.php',
+        'PHPMailerOAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmaileroauth.php',
+        'PHPMailerOAuthGoogle' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmaileroauthgoogle.php',
+        'POP3' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.pop3.php',
+        'SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.smtp.php',
+        'ntlm_sasl_client_class' => __DIR__ . '/..' . '/phpmailer/phpmailer/extras/ntlm_sasl_client.php',
+        'phpmailerException' => __DIR__ . '/..' . '/phpmailer/phpmailer/class.phpmailer.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit609dc610458658c2f20916884625ebc6::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit609dc610458658c2f20916884625ebc6::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr4 = ComposerStaticInit609dc610458658c2f20916884625ebc6::$fallbackDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit609dc610458658c2f20916884625ebc6::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit609dc610458658c2f20916884625ebc6::$classMap;
+            $loader->fallbackDirsPsr4 = ComposerStaticInitde022a098465cf7393de9e401c612d4f::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitde022a098465cf7393de9e401c612d4f::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitde022a098465cf7393de9e401c612d4f::$classMap;
 
         }, null, ClassLoader::class);
     }
