@@ -8,7 +8,11 @@
 
 	$app->get('/', function() {
 		
-		echo "OK";
+		$sql = new \Ronald\DB\Sql();
+
+		$result = $sql->select("SELECT * FROM tb_users");
+
+		echo json_encode($result);
 
 	});
 
