@@ -84,7 +84,7 @@
   <!-- /.control-sidebar -->
   <!-- Add the sidebar's background. This div must be placed
        immediately after the control sidebar -->
-  <div class="control-sidebar-bg"></div>
+  <div class="control-sidebtext/javascriptar-bg"></div>
 </div>
 <!-- ./wrapper -->
 
@@ -97,6 +97,37 @@
 <!-- AdminLTE App -->
 <script src="/res/admin/dist/js/app.min.js"></script>
 
+<script type="text/javascript">
+    
+  document.addEventListener("DOMContentLoaded", function() {
+
+    let sidebarMenu = document.querySelector(".sidebar-menu");
+
+    function setActiveMenuItem(clickedItem){
+
+      sidebarMenu.querySelectorAll("li").forEach(function(item) {
+        item.classList.remove("active");
+      });
+    
+      clickedItem.closest('li').classList.add("active");
+      localStorage.setItem('activeMenuItem', clickedItem.getAttribute('href'));
+    }
+
+    sidebarMenu.addEventListener("click", function(event){
+      if(event.target.tagName === 'A'){
+        setActiveMenuItem(event.target);
+      }
+    });
+
+    let activeHref = localStorage.getItem('activeMenuItem');
+    if(activeHref){
+      let activeLink = sidebarMenu.querySelector(`a[href="${activeHref}"]`);
+      if(activeLink){
+        setActiveMenuItem(activeLink);
+      }
+    }
+  });
+</script>
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the

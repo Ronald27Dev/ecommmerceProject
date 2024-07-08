@@ -61,6 +61,9 @@
                 <div class="copyright">
                     <p>&copy; 2024 Ronald Rodrigues. <a href="#" target="_blank">##</a></p>
                 </div>
+                <div class="admin">
+                    <a href="/admin/login">Admin</a>
+                </div>
             </div>
             
             <div class="col-md-4">
