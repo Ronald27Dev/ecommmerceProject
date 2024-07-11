@@ -1,7 +1,8 @@
 <?php
 	namespace Ronald\Model;
 
-	use \Ronald\DB\Sql;
+use Exception;
+use \Ronald\DB\Sql;
 	use \Ronald\Model;
 	use \Ronald\Mailer;
 
@@ -99,6 +100,79 @@
 		    } else {
 		        echo "Successfully updated file: " . $filePath;
 		    }
+		}
+
+		public function getProducts($related = true){
+
+			$sql = new Sql();
+
+			if($related === true) {
+				return $sql->select("
+					SELECT * 
+					FROM tb_products
+					WHERE idproduct IN(
+						SELECT a.idproduct
+						FROM tb_products a
+						INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
+						WHERE b.idcategory = :idcategory
+					)", 
+					array(
+						":idcategory" => $this->getidcategory()
+				));
+			} else {
+				return $sql->select("
+					SELECT * 
+					FROM tb_products
+					WHERE idproduct NOT IN(
+						SELECT a.idproduct
+						FROM tb_products a
+						INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
+						WHERE b.idcategory = :idcategory
+					)",
+					array(
+						":idcategory" => $this->getidcategory()
+				));
+			}
+		}
+
+		public function updateProductsList($update, $idcategory, $idproduct){
+
+			$sql = new Sql();
+			$sql->beginTransaction();
+			
+			if($update === "remove"){
+				
+				try{
+					
+					$sql->queryE("DELETE FROM tb_productscategories WHERE idcategory = :idcategory AND idproduct = :idproduct", array(
+						":idcategory" 	=> $idcategory,
+						":idproduct"	=> $idproduct
+					));
+					$sql->commit();
+				} catch (\Exception $e) {
+					
+					$sql->rollBack();
+					echo "Erro ao mudar produto de categoria " . $e->getMessage();
+				}
+			} elseif($update === "add"){
+				
+				try {
+					
+					$sql->queryE("
+						INSERT INTO tb_productscategories(idcategory, idproduct) VALUES(:idcategory, :idproduct)
+					", array(
+						":idcategory"	=> $idcategory,
+						":idproduct" 	=> $idproduct
+					));
+					$sql->commit();
+				} catch (\Exception $e) {
+
+					$sql->rollBack();
+					echo "Erro ao mudar produto de categoria " . $e->getMessage();
+				}
+			} else {
+				throw new \Exception("Alteração Invalida!");
+			}
 		}
 	}
 ?>

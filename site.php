@@ -1,4 +1,4 @@
-<?php 
+	<?php 
 	use \Slim\Slim;
 	use \Ronald\Page;
 	use \Ronald\PageAdmin;
@@ -24,7 +24,8 @@
 
 		$page = new Page();
 		$page->setTpl("category", array(
-			"category" => $category->getValues()
+			"category"	=> $category->getValues(),
+			"products"	=> Product::checkList($category->getProducts())
 		));
 	});
 ?>
