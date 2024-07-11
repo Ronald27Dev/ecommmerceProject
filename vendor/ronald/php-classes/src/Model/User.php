@@ -1,5 +1,4 @@
 <?php 
-
     namespace Ronald\Model;
 
     use \Ronald\DB\Sql;
@@ -29,7 +28,6 @@
             if(password_verify($password, $data["despassword"]) === true){
 
                 $user = new User();
-                
                 $user->setData($data);
 
                 $_SESSION[User::SESSION] = $user->getValues();
@@ -37,9 +35,11 @@
                 return $user;
             } else {
 
+                $sql->closeConnection();
                 throw new \Exception("Usuario Inexistente ou Senha Invalida.");
             }
 
+            $sql->closeConnection();
         } 
 
         public static function verifyLogin($inadmin = true) {
@@ -64,26 +64,38 @@
         public static function listAll() {
 
             $sql = new Sql();
+            $result = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson ORDER BY b.desperson ASC");
+            $sql->closeConnection();
 
-            return $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson ORDER BY b.desperson ASC");
+            return $result;
         }
 
         public function save() {
 
             $sql = new Sql();
+            $sql->beginTransaction();
 
-            $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",
-                array(
-                    ":desperson"    => $this->getdesperson(),
-                    ":deslogin"     => $this->getdeslogin(),
-                    ":despassword"  => $this->getdespassword(),
-                    ":desemail"     => $this->getdesemail(),
-                    ":nrphone"      => $this->getnrphone(),
-                    ":inadmin"      => $this->getinadmin()
-                )
-            );
+            try{
+                $results = $sql->select("CALL sp_users_save(:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",
+                    array(
+                        ":desperson"    => $this->getdesperson(),
+                        ":deslogin"     => $this->getdeslogin(),
+                        ":despassword"  => $this->getdespassword(),
+                        ":desemail"     => $this->getdesemail(),
+                        ":nrphone"      => $this->getnrphone(),
+                        ":inadmin"      => $this->getinadmin()
+                    )
+                );
+                
+                $sql->commit();
+                $this->setData($results[0]);
+            } catch (\Exception $e) {
 
-            $this->setData($results[0]);
+                $sql->rollBack();
+                echo "Erro ao Salva Usuario " . $e->getMessage();
+            }
+
+            $sql->closeConnection();
         }
 
         public function get($iduser) {
@@ -94,33 +106,54 @@
             ));
 
             $this->setData($result[0]); 
+
+            $sql->closeConnection();
         }
 
         public function update() {
             $sql = new Sql();
+            $sql->beginTransaction();
 
-            $result = $sql->select("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",
-                array(
-                    ":iduser"       => $this->getiduser(),
-                    ":desperson"    => $this->getdesperson(),
-                    ":deslogin"     => $this->getdeslogin(),
-                    ":despassword"  => $this->getdespassword(),
-                    ":desemail"     => $this->getdesemail(),
-                    ":nrphone"      => $this->getnrphone(),
-                    ":inadmin"      => $this->getinadmin()
-                )
-            );
+            try{
+                $result = $sql->select("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)",
+                    array(
+                        ":iduser"       => $this->getiduser(),
+                        ":desperson"    => $this->getdesperson(),
+                        ":deslogin"     => $this->getdeslogin(),
+                        ":despassword"  => $this->getdespassword(),
+                        ":desemail"     => $this->getdesemail(),
+                        ":nrphone"      => $this->getnrphone(),
+                        ":inadmin"      => $this->getinadmin()
+                    )
+                );
 
-            $this->setData($result[0]);
+                $this->setData($result[0]);
+            } catch (\Exception $e) {
+
+                $sql->rollBack();
+                echo "Erro ao Atualizar Usuario " . $e->getMessage();
+            }
+
+            $sql->closeConnection();
         }
 
         public function delete(){
 
             $sql = new Sql();
+            $sql->beginTransaction();
 
-            $sql->query("CALL sp_users_delete(:iduser)", array(
-                ":iduser" => $this->getiduser()
-            ));
+            try{
+                $sql->queryE("CALL sp_users_delete(:iduser)", array(
+                    ":iduser" => $this->getiduser()
+                ));
+                $sql->commit();
+            } catch (\Exception $e) {
+
+                $sql->rollBack();
+                echo "Erro ao Deletar Usuario " . $e->getMessage();
+            }
+        
+            $sql->closeConnection();
         }
 
         public static function forgotPassword($email) {
@@ -135,7 +168,6 @@
                     tb_users b ON a.idperson = b.idperson 
                 WHERE 
                     a.desemail = :desemail",
-                
                 array(
                     ":desemail" => $email
                 )
@@ -178,6 +210,8 @@
                     return $data;
                 }
             }
+
+            $sql->closeConnection();
         }
 
         private static function getStaticIv() {
@@ -189,7 +223,6 @@
         }
 
         public static function validForgotDecrypt($code){
-
 
             $decoded = openssl_decrypt(base64_decode($code), 'aes-256-cbc', User::SECRETKEY, 0, self::getStaticIv());
 
@@ -217,32 +250,54 @@
                 
                 return $result[0];
             }
+        
+            $sql->closeConnection();
         }
 
         public static function setForgotUsed($idrecovery){
             $sql = new Sql();
+            $sql->beginTransaction();
 
-            $sql->query("
-                UPDATE tb_userspasswordsrecoveries 
-                SET dtrecovery = NOW() 
-                WHERE idrecovery = :idrecovery
-            ", array(
-                ":idrecovery" => $idrecovery
-            ));
+            try {
+                $sql->queryE("
+                    UPDATE tb_userspasswordsrecoveries 
+                    SET dtrecovery = NOW() 
+                    WHERE idrecovery = :idrecovery
+                ", array(
+                    ":idrecovery" => $idrecovery
+                ));
+                $sql->commit();
+            } catch (\Exception $e) {
+
+                $sql->rollBack();
+                echo "Não foi possivel alterar a recuperacao de senha " . $e->getMessage();
+            }
+
+            $sql->closeConnection();            
         }
 
         public function setPassword($password){
 
             $sql = new Sql();
+            $sql->beginTransaction();
 
-            $sql->query("
-                UPDATE tb_users 
-                SET despassword = :password
-                WHERE iduser    = :iduser
-            ", array(
-                ":password" => $password,
-                ":iduser"   => $this->getiduser()
-            ));
+            try{
+                $sql->queryE("
+                    UPDATE tb_users 
+                    SET despassword = :password
+                    WHERE iduser    = :iduser
+                ", array(
+                    ":password" => $password,
+                    ":iduser"   => $this->getiduser()
+                ));
+                $sql->commit();
+            } catch (\Exception $e) {
+
+                $sql->rollBack();
+                echo "Erro em alterar a senha " . $e->getMessage();
+            }
+        
+            $sql->closeConnection();
         }
     }
 ?>
@@ -251,11 +306,6 @@
 
 
 <!-- 
-
-
-
-
-
 SELECT *
 FROM `fin_parcelaformapagamentodesconto`
 WHERE `iddescontoclassificacao` =4
