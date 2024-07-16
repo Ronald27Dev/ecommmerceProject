@@ -150,5 +150,28 @@
 		    imagedestroy($image);
 		}
 
+		public function getFromURL($url){
+
+			$sql = new Sql();
+			$rows = $sql->select("SELECT * FROM tb_products WHERE desurl = :desurl LIMIT 1", array(
+				":desurl"	=> $url
+			));
+			
+			$this->setData($rows[0]);
+		}
+
+		public function getCategories(){
+
+			$sql = new Sql();
+			$result = $sql->select("
+				SELECT b.* 
+				FROM tb_productscategories a
+				INNER JOIN tb_categories b ON a.idcategory = b.idcategory
+				WHERE a.idproduct = :idproduct", array(
+				":idproduct"	=> $this->getidproduct()
+			));
+
+			return $result;
+		}
 	}
 ?>
