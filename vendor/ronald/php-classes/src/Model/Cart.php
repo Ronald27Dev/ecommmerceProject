@@ -129,7 +129,7 @@
 			} catch (\Exception $e) {
 				
 				$sql->rollBack();
-				echo "Erro ao inserir produto no carrinho " . $e->getMessage();
+				error_log("Erro ao inserir produto no carrinho " . $e->getMessage());
 			}
 		}
 

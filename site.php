@@ -1,4 +1,4 @@
-	<?php 
+<?php 
 	use \Slim\Slim;
 	use \Ronald\Page;
 	use \Ronald\PageAdmin;

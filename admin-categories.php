@@ -5,8 +5,7 @@
 	use \Ronald\PageAdmin;
 	use \Ronald\Model\User;
 	use \Ronald\Model\Category;
-
-use function Functions\pr;
+	use function Functions\pr;
 
 	$app->get("/admin/categories", function(){
 
