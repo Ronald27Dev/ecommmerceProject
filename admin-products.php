@@ -30,6 +30,8 @@
 
 		User::verifyLogin();
 
+		$_POST["idproduct"] = null;
+		
 		$products = new Product();
 		$products->setData($_POST);
 		$products->save();

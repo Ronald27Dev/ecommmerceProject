@@ -10,7 +10,7 @@
         private $defaults = [
             "header"=>true,
             "footer"=>true,
-            "data"=>""
+            "data"=>[]
         ];
         private $options;
 
@@ -34,11 +34,15 @@
         }
 
         private function setData($data = array()){
-
+            if (!is_array($data)) {
+                throw new \InvalidArgumentException('Data must be an array');
+            }
+        
             foreach ($data as $key => $value) {
                 $this->tpl->assign($key, $value);
             }
         }
+        
 
         public function setTpl($name, $data =array(), $returnHTML = false){
 

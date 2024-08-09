@@ -5,7 +5,9 @@
 	use \Ronald\PageAdmin;
 	use \Ronald\Model\User;
 	use \Ronald\Model\Category;
-	
+
+use function Functions\pr;
+
 	$app->get("/admin/categories", function(){
 
 		User::verifyLogin();
@@ -38,6 +40,10 @@
 
 		User::verifyLogin();
 
+		$_POST["idcategory"] = null;
+
+		// pr($_POST);
+		
 		$category = new Category();
 		$category->setData($_POST);
 		$category->save();

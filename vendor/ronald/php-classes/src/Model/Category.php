@@ -6,13 +6,14 @@
 	use \Ronald\Model;
 	use \Ronald\Mailer;
 
+	use function functions\pr;
+
 	class Category extends Model {
 
 		public static function listAll(){
 
 			$sql = new Sql();
 			$result = $sql->select("SELECT * FROM tb_categories ORDER BY descategory ASC");
-            $sql->closeConnection();
 
             return $result;
 		}
@@ -21,7 +22,7 @@
 
 			$sql = new Sql();
 			$sql->beginTransaction();
-
+			
 			try{
 
 				$result = $sql->select("CALL sp_categories_save(:idcategory, :descategory)", array(
@@ -34,12 +35,11 @@
 			} catch (\Exception $e) {
 
 				$sql->rollBack();
-				echo "Erro ao salvar categoria " . $e->getMessage();
+				throw new Exception("Erro ao salvar categoria " . $e->getMessage());
 			}
 
 			Category::updateFile();
 
-			$sql->closeConnection();
 		}
 
 		public function get($idcategory) {
@@ -53,11 +53,9 @@
 				$this->setData($result[0]);
 			} else {
 
-            	$sql->closeConnection();
 				throw new \Exception("Categoria Não Encotrada!");
 			}
 
-            $sql->closeConnection();
 		}
 
 		public function delete($idcategory){
@@ -79,7 +77,6 @@
 
 			Category::updateFile();
 
-            $sql->closeConnection();
 		}
 
 		public static function updateFile() {

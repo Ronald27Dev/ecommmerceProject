@@ -49,8 +49,6 @@
 		$product = new Product();
 		$product->getFromURL($desurl);
 
-		// print_r($product->getCategories());die;
-		// print_r($product->getValues());die;
 		$page = new Page();
 		$page->setTpl("product-detail", array(
 			'product' 		=> $product->getValues(),

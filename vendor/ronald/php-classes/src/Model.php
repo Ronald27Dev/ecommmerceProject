@@ -1,39 +1,41 @@
-<?php 
+<?php
 
-    namespace Ronald;
+namespace Ronald;
 
-    class Model{
+class Model {
 
-        private $values = [];
-    
-        public function __call($name, $arguments){
+    protected $values = [];
 
-            $method = substr($name, 0, 3);
-            $fieldName = substr($name, 3, strlen($name));
-        
-            switch ($method) {
-                case 'get':
-                    return $this->values[$fieldName];
-                break;
+    public function __call($name, $arguments) {
+        $method = substr($name, 0, 3);
+        $fieldName = substr($name, 3);
+
+        // Handle the specific cases
+        if ($method === 'get') {
+
+            if ($fieldName === 'idcart') {
                 
-                case 'set':
-                    $this->values[$fieldName] = $arguments[0];
-                break;
+                return isset($this->values[$fieldName]) ? $this->values[$fieldName] : 0;
+
+            } elseif ($fieldName === 'deszipcode' || $fieldName === 'vlfreight' || $fieldName === 'nrdays') {
+                
+                return isset($this->values[$fieldName]) ? $this->values[$fieldName] : null;
             }
-        }
 
-        public function setData($data = array()){
-
-            foreach ($data as $key => $value) {
-
-                $this->{"set".$key}($value);
-            }
-        }
-
-        public function getValues(){
-
-            return $this->values;
+            return $this->values[$fieldName];
+        } elseif ($method === 'set') {
+            
+            $this->values[$fieldName] = $arguments[0];
         }
     }
 
-?>
+    public function setData($data = array()) {
+        foreach ($data as $key => $value) {
+            $this->{"set" . $key}($value);
+        }
+    }
+
+    public function getValues() {
+        return $this->values;
+    }
+}

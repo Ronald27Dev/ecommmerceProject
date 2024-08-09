@@ -15,8 +15,8 @@
         public static function checkLogin($inadmin = true) {
 
             if(
-                !isset($_SESSION[User::SESSION])            ||
-                !$_SESSION[User::SESSION]                   ||
+                !isset($_SESSION[User::SESSION])                ||
+                !$_SESSION[User::SESSION]                       ||
                 !(int)$_SESSION[User::SESSION]['iduser'] > 0
             ) {
                 //Não está logado
@@ -69,11 +69,9 @@
                 return $user;
             } else {
 
-                $sql->closeConnection();
                 throw new \Exception("Usuario Inexistente ou Senha Invalida.");
             }
 
-            $sql->closeConnection();
         } 
 
         public static function verifyLogin($inadmin = true) {
@@ -99,7 +97,6 @@
 
             $sql = new Sql();
             $result = $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson ORDER BY b.desperson ASC");
-            $sql->closeConnection();
 
             return $result;
         }
@@ -126,10 +123,9 @@
             } catch (\Exception $e) {
 
                 $sql->rollBack();
-                echo "Erro ao Salva Usuario " . $e->getMessage();
+                throw new \Exception("Erro ao Salva Usuario " . $e->getMessage());
             }
 
-            $sql->closeConnection();
         }
 
         public function get($iduser) {
@@ -140,8 +136,6 @@
             ));
 
             $this->setData($result[0]); 
-
-            $sql->closeConnection();
         }
 
         public function update() {
@@ -160,15 +154,16 @@
                         ":inadmin"      => $this->getinadmin()
                     )
                 );
-
+                // pr($result);
                 $this->setData($result[0]);
+                $sql->commit();
             } catch (\Exception $e) {
 
                 $sql->rollBack();
-                echo "Erro ao Atualizar Usuario " . $e->getMessage();
+                throw new \Exception("Erro ao Atualizar Usuario " . $e->getMessage());
+                 
             }
 
-            $sql->closeConnection();
         }
 
         public function delete(){
@@ -184,10 +179,9 @@
             } catch (\Exception $e) {
 
                 $sql->rollBack();
-                echo "Erro ao Deletar Usuario " . $e->getMessage();
+                throw new \Exception("Erro ao Deletar Usuario " . $e->getMessage());
             }
         
-            $sql->closeConnection();
         }
 
         public static function forgotPassword($email) {
@@ -245,7 +239,6 @@
                 }
             }
 
-            $sql->closeConnection();
         }
 
         private static function getStaticIv() {
@@ -285,7 +278,6 @@
                 return $result[0];
             }
         
-            $sql->closeConnection();
         }
 
         public static function setForgotUsed($idrecovery){
@@ -304,10 +296,9 @@
             } catch (\Exception $e) {
 
                 $sql->rollBack();
-                echo "Não foi possivel alterar a recuperacao de senha " . $e->getMessage();
+                throw new \Exception("Não foi possivel alterar a recuperacao de senha " . $e->getMessage());
             }
 
-            $sql->closeConnection();            
         }
 
         public function setPassword($password){
@@ -328,10 +319,9 @@
             } catch (\Exception $e) {
 
                 $sql->rollBack();
-                echo "Erro em alterar a senha " . $e->getMessage();
+                throw new \Exception("Erro em alterar a senha " . $e->getMessage());
             }
         
-            $sql->closeConnection();
         }
     }
 ?>

@@ -11,7 +11,6 @@
 
 			$sql = new Sql();
 			$result = $sql->select("SELECT * FROM tb_products ORDER BY desproduct ASC");
-            $sql->closeConnection();
 
 			return $result;
 		}
@@ -53,7 +52,6 @@
 				error_log("Erro ao inserir Produto " . $e->getMessage());
 			}
 
-            $sql->closeConnection();
 		}
 
 		public function get($idproduct){
@@ -70,7 +68,6 @@
 				throw new \Exception("Produto Não Encotrado!");
 			}
 		
-            $sql->closeConnection();
 		}
 
 		public function delete($idproduct) {
@@ -90,7 +87,6 @@
 		        error_log("Erro ao deletar: " . $e->getMessage());
 		    }
 		
-            $sql->closeConnection();
 		}
 
 		public function checkPhoto() {
@@ -156,7 +152,6 @@
 			$rows = $sql->select("SELECT * FROM tb_products WHERE desurl = :desurl LIMIT 1", array(
 				":desurl"	=> $url
 			));
-			
 			$this->setData($rows[0]);
 		}
 
