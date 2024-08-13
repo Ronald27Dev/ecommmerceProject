@@ -1,7 +1,7 @@
 <?php
 	namespace Ronald\Model;
 
-	use Exception;
+	use PDOException;
 	use \Ronald\DB\Sql;
 	use \Ronald\Model;
 	use \Ronald\Model\User;
@@ -80,7 +80,7 @@
 					$this->setdtregister($result[0]['dtregister']);
 				}
 
-			} catch (Exception $e) {
+			} catch (PDOException $e) {
 
 				$sql->rollBack();
 				die("Erro ao pegar o id da sessão " . $e->getMessage());
@@ -103,7 +103,7 @@
 				if(count($result) > 0) {
 					$this->setData($result[0]);
 				} 
-			} catch (Exception $e) {
+			} catch (PDOException $e) {
 
 				$sql->rollBack();
 				die("Erro ao encontrar carrinho " . $e->getMessage());
@@ -126,7 +126,7 @@
 				));
 				$this->setData($result);
 				$sql->commit();	
-			} catch (\Exception $e) {
+			} catch (PDOException $e) {
 				
 				$sql->rollBack();
 				error_log("Erro ao inserir produto no carrinho " . $e->getMessage());
@@ -139,13 +139,12 @@
 			$sql->beginTransaction();
 
 			try {
-
-				$sql->queryE("INSERT INTO tb_cartsproducts (idcart, idproduct) VALUES(:idproduct, :idcart)", array(
+				$sql->queryE("INSERT INTO tb_cartsproducts (idcart, idproduct) VALUES(:idcart, :idproduct)", array(
 					":idcart"		=> $this->getidcart(),
 					":idproduct" 	=> $product->getidproduct()
 				));
 				$sql->commit();
-			} catch (Exception $e) {
+			} catch (PDOException $e) {
 
 				$sql->rollBack();
 				die("Erro ao inserir produto no carrinho " . $e->getMessage());
@@ -166,7 +165,7 @@
 						":idproduct"	=> $product->getidproduct()
 					));
 					$sql->commit();
-				} catch (Exception $e) {
+				} catch (PDOException $e) {
 
 					$sql->rollBack();
 					die("Erro ao remover todos productos do carrinho " . $e->getMessage());
@@ -177,14 +176,73 @@
 					
 					$sql->queryE("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart = :idcart AND idproduct = :idproduct AND dtremoved IS NULL LIMIT 1", array(
 						":idcart"		=> $this->getidcart(),
-						":idproduct"	=>$product->getidroduct()
+						":idproduct"	=>$product->getidproduct()
 					));
 					$sql->commit();
-				} catch (Exception $e) {
+				} catch (PDOException $e) {
 
 					$sql->rollBack();
 					die("Erro ao remover um produto do carrinho " . $e->getMessage());
 				}
+			}
+		}
+
+		public function getProductsForCart(){
+
+			$sql = new Sql();
+
+			try {
+				
+				$sql->beginTransaction();
+
+				$result = $sql->select(
+				    "SELECT 
+				   		p.idproduct, 
+				   		p.desproduct, 
+						p.vlwidth, 
+						p.vlheight,
+						p.vllength, 
+						p.vlweight, 
+						p.desurl, 
+						p.vlprice, 
+						COUNT(*) AS 'quant', 
+						SUM(p.vlprice) AS 'total'
+					
+					FROM 
+						tb_cartsproducts c
+					
+					INNER JOIN 
+						tb_products p ON p.idproduct = c.idproduct
+					
+					WHERE 
+						c.idcart = :idcart
+					AND 
+						c.dtremoved IS NULL
+						
+					GROUP BY 
+						p.idproduct, 
+				   		p.desproduct, 
+						p.vlwidth, 
+						p.vlheight,
+						p.vllength, 
+						p.vlweight, 
+						p.desurl, 
+						p.vlprice
+					
+					ORDER BY
+						p.desproduct
+					", array(
+						":idcart" => $this->getidcart()
+					)
+				);
+
+				$sql->commit();
+				
+				return Product::checkList($result);
+			} catch (PDOException $e) {
+				
+				$sql->rollBack();
+				die("Erro ao retornar os Produtos: " . $e->getMessage());
 			}
 		}
 

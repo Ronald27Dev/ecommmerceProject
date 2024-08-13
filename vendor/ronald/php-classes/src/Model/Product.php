@@ -65,7 +65,7 @@
 			if(isset($result[0])) {
 				$this->setData($result[0]);
 			} else {
-				throw new \Exception("Produto Não Encotrado!");
+				throw new \Exception("Produto Não Encontrado!");
 			}
 		
 		}
