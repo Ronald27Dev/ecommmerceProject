@@ -1,7 +1,8 @@
 <?php 
     namespace Ronald\Model;
 
-    use \Ronald\DB\Sql;
+use PDOException;
+use \Ronald\DB\Sql;
     use \Ronald\Model;
     use \Ronald\Mailer;
 
@@ -342,14 +343,50 @@
             return $msg;
         }
 
+        
         public static function clearError() {
-
+            
             $_SESSION[User::ERROR] = NULL;
+        }
+        
+        public static function clearErrorRegister() {
+            
+            $_SESSION[User::ERROR_REGISTER] = NULL;
+        }
+
+        public static function getErrorRegister() {
+
+            $msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER]) ? $_SESSION[User::ERROR_REGISTER] : '';
+
+            User::clearErrorRegister();
+
+            return $msg;
         }
 
         public static function setErrorRegister($msg) {
 
             $_SESSION[User::ERROR_REGISTER] = $msg;
+        }
+
+        public static function checkLoginExist($login, $senha) {
+
+            $sql = new Sql();
+
+            try{
+                $sql->beginTransaction();
+
+                $result = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin OR desenha = :desenha", array(
+                    ":deslogin" => $login,
+                    ":dessenha" => $senha
+                ));
+                $sql->commit();
+                
+                return (count($result) > 0);
+            } catch (PDOException $e) {
+
+                $sql->rollBack();
+                throw new PDOException("Erro ao checar login");
+            }        
         }
     }
 ?>
