@@ -100,9 +100,8 @@
 				));
 				$sql->commit();
 
-				if(count($result) > 0) {
-					$this->setData($result[0]);
-				} 
+				if(count($result) > 0) $this->setData($result[0]);
+				
 			} catch (PDOException $e) {
 
 				$sql->rollBack();
@@ -218,7 +217,7 @@
 						c.idcart = :idcart
 					AND 
 						c.dtremoved IS NULL
-						
+
 					GROUP BY 
 						p.idproduct, 
 				   		p.desproduct, 
@@ -246,39 +245,145 @@
 			}
 		}
 
-		public function setidcart($value) {
-			// error_log("Setting idcart to: " . $value);
-			$this->values['idcart'] = isset($value) ? $value : null;
+		public function getProductsTotal(){
+
+			$sql = new Sql();
+
+			try {
+				
+				$sql->beginTransaction();
+
+				$result = $sql->select(
+					"SELECT 
+						SUM(p.vlprice) 	AS 'vlprice',
+						SUM(p.vlwidth) 	AS 'vlwidth',
+						SUM(p.vlheight) AS 'vlheight',
+						SUM(p.vllength)	AS 'vllength',
+						SUM(p.vlweight) AS 'vlweight',
+						COUNT(*)		AS 'quant'
+					
+					FROM 
+						tb_products p
+					
+					INNER JOIN 
+						tb_cartsproducts c ON p.idproduct = c.idproduct
+					
+					WHERE
+						c.dtremoved IS NULL
+					AND
+						c.idcart = :idcart;
+					", array(
+						":idcart" => $this->getidcart()
+					)
+				);
+
+				$sql->commit();
+				return $result[0] ?? [];
+
+			} catch (PDOException $e) {
+
+				$sql->rollBack();
+				die("Erro ao calcular valores dos produtos no carrinho. " . $e->getMessage());
+			}
 		}
 
-		public function setdessessionid($value) {
-			// error_log("Setting dessessionid to: " . $value);
-			$this->values['dessessionid'] = $value;
-		}
+		// Função para calculo do Frete 
+		// Nao Usada devido a necessidade de cadastro nos correios
+		// public function setFreight($zipcode) {
+		// 	// Clean ZIP code
+		// 	$zipcode = str_replace("-", "", $zipcode);
+		
+		// 	// Retrieve product totals
+		// 	$totals = $this->getProductsTotal();
+		
+		// 	// Check if there are products
+		// 	if ($totals['quant'] > 0) {
+		// 		// Ensure minimum dimensions
+		// 		$totals["vlheight"] = max($totals["vlheight"], 2);
+		// 		$totals["vllength"] = max($totals["vllength"], 16);
+		// 		$totals["vlwidth"] = max($totals["vlwidth"], 11);
+		
+		// 		// Build the request payload
+		// 		$payload = [
+		// 			"cepOrigem"    		=> "35338000",
+		// 			"cepDestino"   		=> $zipcode,
+		// 			"peso"         		=> $totals["vlweight"],
+		// 			"comprimento"  		=> $totals["vllength"],
+		// 			"altura"       		=> $totals["vlheight"],
+		// 			"largura"      		=> $totals["vlwidth"],
+		// 			"valorDeclarado" 	=> $totals["vlprice"],
+		// 			"maoPropria"   		=> 'S',
+		// 			"avisoRecebimento" 	=> 'S'
+		// 		];
+		
+		// 		// Set API URL and headers (adjust as needed based on the new API documentation)
+		// 		$url = "https://api.correios.com.br/v1/calculo-frete";
+		// 		$headers = [
+		// 			"Authorization: Bearer YOUR_API_KEY",
+		// 			"Content-Type: application/json"
+		// 		];
+		
+		// 		// Perform the API request
+		// 		$ch = curl_init($url);
+		// 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		// 		curl_setopt($ch, CURLOPT_POST, true);
+		// 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+		
+		// 		$response = curl_exec($ch);
+		// 		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		// 		curl_close($ch);
+		
+		// 		if ($httpCode != 200) {
+		// 			// Handle errors
+		// 			echo "Failed to retrieve shipping data. HTTP Code: $httpCode";
+		// 			return;
+		// 		}
+		
+		// 		// Decode JSON response
+		// 		$responseData = json_decode($response, true);
+		
+		// 		if (json_last_error() !== JSON_ERROR_NONE) {
+		// 			// Handle JSON parsing errors
+		// 			echo "Failed to parse JSON response.";
+		// 			return;
+		// 		}
+		// 	}
+		// }		
 
-		public function setiduser($value) {
-			// error_log("Setting iduser to: " . $value);
-			$this->values['iduser'] = isset($value) ? $value : null;
-		}
+		// public function setidcart($value) {
+		// 	// error_log("Setting idcart to: " . $value);
+		// 	$this->values['idcart'] = isset($value) ? $value : null;
+		// }
 
-		public function setdeszipcode($value) {
-			// error_log("Setting deszipcode to: " . $value);
-			$this->values['deszipcode'] = isset($value) ? $value : null;
-		}
+		// public function setdessessionid($value) {
+		// 	// error_log("Setting dessessionid to: " . $value);
+		// 	$this->values['dessessionid'] = $value;
+		// }
 
-		public function setvlfreight($value) {
-			// error_log("Setting vlfreight to: " . $value);
-			$this->values['vlfreight'] = isset($value) ? $value : null;
-		}
+		// public function setiduser($value) {
+		// 	// error_log("Setting iduser to: " . $value);
+		// 	$this->values['iduser'] = isset($value) ? $value : null;
+		// }
 
-		public function setnrdays($value) {
-			// error_log("Setting nrdays to: " . $value);
-			$this->values['nrdays'] = isset($value) ? $value : null;
-		}
+		// public function setdeszipcode($value) {
+		// 	// error_log("Setting deszipcode to: " . $value);
+		// 	$this->values['deszipcode'] = isset($value) ? $value : null;
+		// }
 
-		public function setdtregister($value) {
-			// error_log("Setting dtregister to: " . $value);
-			$this->values['dtregister'] = isset($value) ? $value : null;
-		}
+		// public function setvlfreight($value) {
+		// 	// error_log("Setting vlfreight to: " . $value);
+		// 	$this->values['vlfreight'] = isset($value) ? $value : null;
+		// }
+
+		// public function setnrdays($value) {
+		// 	// error_log("Setting nrdays to: " . $value);
+		// 	$this->values['nrdays'] = isset($value) ? $value : null;
+		// }
+
+		// public function setdtregister($value) {
+		// 	// error_log("Setting dtregister to: " . $value);
+		// 	$this->values['dtregister'] = isset($value) ? $value : null;
+		// }
 	}
 ?>

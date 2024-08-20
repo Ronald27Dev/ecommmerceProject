@@ -1,8 +1,23 @@
 <?php
 
-	function formatPrice(float $vlprice){
+	use Ronald\Model\User;
+
+	function formatPrice($vlprice){
 
 		return number_format($vlprice, 2, ",", ".");
+	}
+
+
+	function checkUserName(){
+
+		$user = User::getFromSession();
+		
+		return $user->getdesperson();
+	}
+
+	function checkLogin($inadmin = false) {
+		
+		return User::checkLogin($inadmin);
 	}
 
 	function pr($value='',$die = 1){

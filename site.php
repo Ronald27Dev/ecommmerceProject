@@ -1,9 +1,11 @@
-<?php 
+<?php
 
+	use Ronald\Address;
 	use \Ronald\Page;
 	use \Ronald\Model\Category;
 	use \Ronald\Model\Product;
 	use \Ronald\Model\Cart;
+	use Ronald\Model\User;
 
 	$app->get('/', function() {
 
@@ -16,7 +18,7 @@
 
 	});
 
-	$app->get("/categories/:idcategory", function($idcategory){
+	$app->get("/categories/:idcategory", function($idcategory) {
 
 		$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
 
@@ -42,7 +44,7 @@
 		));
 	});
 
-	$app->get("/products/:desurl", function($desurl){
+	$app->get("/products/:desurl", function($desurl) {
 
 		$product = new Product();
 		$product->getFromURL($desurl);
@@ -58,13 +60,15 @@
 
 		$cart = Cart::getFromSession();
 		$page = new Page();
+
 		$page->setTpl("cart", array(
 			"cart" 		=> $cart->getValues(),
-			"products" 	=> $cart->getProductsForCart()
+			"products" 	=> $cart->getProductsForCart(),
+			"final"		=> $cart->getProductsTotal()
 		));
 	});
 
-	$app->get("/cart/:idproduct/add", function($idproduct){
+	$app->get("/cart/:idproduct/add", function($idproduct) {
 
 		$product = new Product();
 		$product->get((int)$idproduct);
@@ -79,7 +83,7 @@
 		exit;
 	});
 
-	$app->get("/cart/:idproduct/minus", function($idproduct){
+	$app->get("/cart/:idproduct/minus", function($idproduct) {
 
 		$product = new Product();
 		$product->get((int)$idproduct);
@@ -91,7 +95,7 @@
 		exit;
 	});
 
-	$app->get("/cart/:idproduct/remove", function($idproduct){
+	$app->get("/cart/:idproduct/remove", function($idproduct) {
 
 		$product = new Product();
 		$product->get((int)$idproduct);
@@ -102,4 +106,62 @@
 		header("Location: /cart");
 		exit;
 	});
+
+	// Endereco para calculo do Frete
+	$app->post("/cart/freight", function() {
+
+		// $cart = Cart::getFromSession();
+		// $cart->setFreight($_POST['zipcode']);
+
+		header("Location: /cart");
+		exit;
+	});
+
+	$app->get("/checkout", function() {
+
+		User::verifyLogin(false);
+		
+		$cart = Cart::getFromSession();
+
+		$address = new Address;
+
+		$page = new Page();
+		$page->setTpl("checkout", array(
+			"cart"		=> $cart->getValues(),
+			"adress"	=> $address->getValues()
+		));
+	});
+
+	$app->get("/login", function() {
+
+		$page = new Page();
+		$page->setTpl("login", array(
+			"error"	=>User::getError()
+		));
+	});
+
+	$app->post("/login", function() {
+
+		
+		try{
+			
+			User::login($_POST['login'], $_POST['password']);
+		
+		} catch(Exception $e) {
+
+			User::setError($e->getMessage());
+		}
+
+		header("Location: /login");
+		exit;
+	});
+
+
+	$app->get("/logout", function(){
+
+		User::logout();
+
+		header("Location: /");
+		exit;
+	})
 ?>

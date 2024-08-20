@@ -7,8 +7,10 @@
 
     class User extends Model{
 
-        const SESSION = "User";
-        const SECRETKEY = "constForSecretKey";
+        const SESSION           = "User";
+        const SECRETKEY         = "constForSecretKey";
+        const ERROR             = "UserError";
+        const ERROR_REGISTER    = "UserErrorRegister";
 
         private static $staticIv;
 
@@ -50,7 +52,9 @@
 
             $sql = new Sql();
 
-            $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(":LOGIN"=>$login));
+            $results = $sql->select("SELECT * FROM tb_users u INNER JOIN tb_persons p ON p.idperson = u.idperson  WHERE deslogin = :LOGIN", array(
+                ":LOGIN" => $login
+            ));
 
             if(count($results) === 0){
 
@@ -63,8 +67,9 @@
 
                 $user = new User();
                 $user->setData($data);
-
+                
                 $_SESSION[User::SESSION] = $user->getValues();
+                
 
                 return $user;
             } else {
@@ -154,7 +159,6 @@
                         ":inadmin"      => $this->getinadmin()
                     )
                 );
-                // pr($result);
                 $this->setData($result[0]);
                 $sql->commit();
             } catch (\Exception $e) {
@@ -188,8 +192,8 @@
 
             $sql = new Sql();
 
-            $result = $sql->select("
-                SELECT * 
+            $result = $sql->select(
+                "SELECT * 
                 FROM 
                     tb_persons a 
                 INNER JOIN 
@@ -255,8 +259,8 @@
 
             $sql = new Sql();
 
-            $result = $sql->select("
-                SELECT * 
+            $result = $sql->select(
+                "SELECT * 
                 FROM tb_userspasswordsrecoveries r 
                 INNER JOIN tb_users u ON r.iduser = u.iduser 
                 INNER JOIN tb_persons p ON p.idperson = u.idperson 
@@ -285,8 +289,8 @@
             $sql->beginTransaction();
 
             try {
-                $sql->queryE("
-                    UPDATE tb_userspasswordsrecoveries 
+                $sql->queryE(
+                    "UPDATE tb_userspasswordsrecoveries 
                     SET dtrecovery = NOW() 
                     WHERE idrecovery = :idrecovery
                 ", array(
@@ -307,8 +311,8 @@
             $sql->beginTransaction();
 
             try{
-                $sql->queryE("
-                    UPDATE tb_users 
+                $sql->queryE(
+                    "UPDATE tb_users 
                     SET despassword = :password
                     WHERE iduser    = :iduser
                 ", array(
@@ -322,6 +326,30 @@
                 throw new \Exception("Erro em alterar a senha " . $e->getMessage());
             }
         
+        }
+    
+        public static function setError($msg) {
+
+            $_SESSION[User::ERROR] = $msg;
+        }
+
+        public static function getError() {
+
+            $msg = (isset($_SESSION[User::ERROR]) && $_SESSION[User::ERROR]) ? $_SESSION[User::ERROR] : '';
+
+            User::clearError();
+
+            return $msg;
+        }
+
+        public static function clearError() {
+
+            $_SESSION[User::ERROR] = NULL;
+        }
+
+        public static function setErrorRegister($msg) {
+
+            $_SESSION[User::ERROR_REGISTER] = $msg;
         }
     }
 ?>
