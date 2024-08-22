@@ -11,6 +11,7 @@ use \Ronald\DB\Sql;
         const SESSION           = "User";
         const SECRETKEY         = "constForSecretKey";
         const ERROR             = "UserError";
+        const SUCCESS           = "UserSuccess";
         const ERROR_REGISTER    = "UserErrorRegister";
 
         private static $staticIv;
@@ -189,7 +190,7 @@ use \Ronald\DB\Sql;
         
         }
 
-        public static function forgotPassword($email) {
+        public static function forgotPassword($email, $inadmin = true) {
 
             $sql = new Sql();
 
@@ -229,8 +230,13 @@ use \Ronald\DB\Sql;
 
                     $code = base64_encode(openssl_encrypt($dataRecovery["idrecovery"], 'aes-256-cbc', User::SECRETKEY, 0, self::getStaticIv()));
 
-                    $link = "http//www.ecommerce.com.br/admin/forgot/reset?code=$code";
-                
+                    if($inadmin === true) {
+                        
+                        $link = "http//www.ecommerce.com.br/admin/forgot/reset?code=$code";
+                    } else {
+                        
+                        $link = "http//www.ecommerce.com.br/forgot/reset?code=$code";
+                    }
                     $mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir Senha de Login", "forgot",
                         array(
                             "name"  => $data["desperson"],
@@ -368,7 +374,27 @@ use \Ronald\DB\Sql;
             $_SESSION[User::ERROR_REGISTER] = $msg;
         }
 
-        public static function checkLoginExist($login, $senha) {
+        public static function setSuccess($msg) {
+
+            $_SESSION[User::SUCCESS] = $msg;
+        }
+
+        public static function getSuccess() {
+
+            $msg = (isset($_SESSION[User::SUCCESS]) && $_SESSION[User::SUCCESS]) ? $_SESSION[User::SUCCESS] : '';
+
+            User::clearSuccess();
+
+            return $msg;
+        }
+
+        
+        public static function clearSuccess() {
+            
+            $_SESSION[User::SUCCESS] = NULL;
+        }
+
+        public static function checkLoginExist($login, $senha = '') {
 
             $sql = new Sql();
 

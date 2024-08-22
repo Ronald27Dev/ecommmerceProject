@@ -213,4 +213,119 @@
 		header("Location: /checkout");
 		exit;
 	});
+
+
+	$app->get('/forgot', function(){
+
+		$page = new Page();
+
+		$page->setTpl("forgot", array(
+			"error"	=> User::getError(),
+		));
+	});
+
+	$app->post('/forgot', function(){
+
+		try{
+			$user = User::forgotPassword($_POST["email"], false);
+		} catch (\Exception $e) {
+			User::setError($e->getMessage());
+			
+			header("Location: /forgot");
+			exit;
+		}
+		header("Location: /forgot/sent");
+		exit;
+	});
+
+	$app->get("/forgot/sent", function(){
+
+		$page = new Page();
+		$page->setTpl("forgot-sent");
+	});
+	
+	$app->get("/forgot/reset", function(){
+
+		$user = User::validForgotDecrypt($_GET["code"]);
+
+		$page = new Page();
+		$page->setTpl("forgot-reset", array(
+			"name"	=> $user["desperson"],
+			"code" 	=> $_GET["code"]	
+		));
+	});
+
+	$app->post("/forgot/reset", function(){
+
+		$userRecovery = User::validForgotDecrypt($_POST["code"]);
+
+		USER::setForgotUsed($userRecovery["idrecovery"]);
+	
+		$user = new User();
+		$user->get((int)$userRecovery["iduser"]);
+
+		$password = password_hash($_POST["password"], PASSWORD_DEFAULT, ["cost" => 12]);
+		
+		$user->setPassword($password);
+
+		$page = new Page();
+		$page->setTpl("forgot-reset-success");
+	});
+
+
+	$app->get("/profile", function() {
+
+		User::verifyLogin(false);
+
+		$user = User::getFromSession();
+
+		$page = new Page();
+		$page->setTpl("profile", array(
+			"user"			=> $user->getValues(),
+			"profileMsg"	=> User::getSuccess(),
+			"profileError"	=> User::getError()
+		));
+	}); 
+
+	$app->post("/profile", function(){
+
+		User::verifyLogin(false);
+
+		if(!$_POST["desperson"] || $_POST["desperson"] === '') {
+			User::setError("Preencha o campo nome");
+			header("Location: /profile");
+			exit;
+		}
+		if(!$_POST["desemail"] || $_POST["desemail"] === '') {
+			User::setError("Preencha o campo E-mail");
+			header("Location: /profile");
+			exit;
+		}
+		if(!$_POST["nrphone"] || $_POST["nrphone"] === ''){
+			User::setError("Preencha o campo Telefone");
+			header("Location: /profile");
+			exit;
+		}
+		
+		$user = User::getFromSession();
+		
+		if($_POST["desemail"] !== $user->getdesemail()) {
+			if(User::checkLoginExist($_POST["desemail"]) === true) {
+				User::setError("E-mail já esta em uso");
+			}
+		}
+
+
+		$_POST['inadmin'] 		= $user->getinadmin();
+		$_POST['despassword']	= $user->getdespassword();
+		$_POST["deslogin"]		=$_POST["desemail"];
+
+		$user->setData($_POST);
+		$user->update();
+
+		User::setSuccess("Informações Atualizadas");
+
+		header("Location: /profile");
+		exit;
+	})
 ?>
